@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  frontend:
+    container_name: jupyter
+    image: jupyter/scipy-notebook
+    ports:
+      - 10000:8888
+    networks:
+      - front-tier
+      - back-tier
+    volumes:
+      - .:/home/jovyan/work/devops
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    depends_on:
+      - backend
+    command:
+      - /bin/sh
+      - -c
+      - |
+        pip install pymongo
+        jupyter lab --allow-root
+
+  backend:
+    container_name: mongodb
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - back-tier
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
+
+networks:
+  front-tier:
+  back-tier:
